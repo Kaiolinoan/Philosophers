@@ -3,58 +3,104 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
+/*   By: klino-an <klino-an@student.42lisboa.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/10 15:35:47 by marvin            #+#    #+#             */
-/*   Updated: 2025/09/10 15:35:47 by marvin           ###   ########.fr       */
+/*   Updated: 2025/09/17 17:41:51 by klino-an         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../philosophers.h"
 
+///
 
+	// pthread_mutex_lock(&data->mutex);
+	// 	while (j < data->total_philo)
+	// 	{
+	// 		printf("---philo[%d]---\n",j );
+	// 		printf("id: %d\n", data->s_philo[j].id);
+	// 		printf("last meal: %d\n", data->s_philo[j].last_meal);
+	// 		printf("meals eaten: %d\n", data->s_philo[j].meals_eaten);
+	// 		printf("l_fork: %p\n", &data->s_philo[j].l_fork);
+	// 		printf("r_fork: %p\n", &data->s_philo[j].r_fork);
+	// 		printf("\n");
+	// 		j++;
+	// 	}
+	// 	pthread_mutex_unlock(&data->mutex);
 
-void *routine(void *arg)
+///
+
+void	take_left_fork(t_philo *philo)
 {
-	int i = *(int *)arg;
-	while(1)
+	pthread_mutex_lock(&data()->mutex);
+	print_msg(philo->id, "has taken a left fork");
+	pthread_mutex_unlock(&data()->mutex);
+	pthread_mutex_lock(philo->l_fork);
+}
+
+void	take_right_fork(t_philo *philo)
+{
+	pthread_mutex_lock(&data()->mutex);
+	print_msg(philo->id, "has taken a right fork");
+	pthread_mutex_unlock(&data()->mutex);
+	pthread_mutex_lock(philo->r_fork);
+}
+
+void	eating(t_philo *philo)
+{
+	// pthread_mutex_lock(&data->mutex);
+	print_msg(philo->id,"is eating");
+	// pthread_mutex_unlock(&data->mutex);
+	usleep(data()->time_to_eat * 1000);
+	pthread_mutex_unlock(philo->l_fork);
+	pthread_mutex_unlock(philo->r_fork);
+}
+
+void	*routine(void *arg)
+{
+	t_philo *philo;
+
+	philo = arg;
+	while (1)
 	{
-		take_left_fork();
-		take_right_fork();
-		//pegar o garfo
-		//comer
-		//dormir
-		//pensar
-		//morrer 
+		// pegar o garfo
+		take_left_fork(philo);
+		take_right_fork(philo);
+		// comer
+		eating(philo);
+		// dormir
+		// pensar
+		// morrer
+		break ;
 	}
-	return NULL;
+	return (NULL);
 }
 
 int	main(int argc, char **argv)
 {
-	t_philo		*data;
-	int			i;
+	t_data	*data1;
 
-	data = NULL;
+	int i = -1;
+	data1 = NULL;
 	if (argc > 6)
-		return (printf("saiu no argc"), 0); //arumar aqui dps
-	data = initialize_vars(argc, argv);
-    if (!data)
-		return (free(data->philos), EXIT_FAILURE);
+		return (printf("saiu no argc"), 0); // arumar aqui dps
+	if (initialize_vars(argv) == false)
+		return (free(data1->s_philo), EXIT_FAILURE);
+
+	data1 = data();
 	if (check_args(argc, argv) == false)
-		return (EXIT_FAILURE); //dps verificar se aloquei alguma coisa antes de sair
-	// pthread_mutex_init(data->mutex, NULL);
-	i = -1;
-	while (++i < data->total_philo)
-	{
-		int *sla = malloc(sizeof(int));
-		*sla = i;
-		if (pthread_create(&data->philos[i], NULL, &routine, sla) < 0) //criar routine
+		return (EXIT_FAILURE);
+			// dps verificar se aloquei alguma coisa antes de sair
+	if (intialize_mutex(data1) == false)
+		return (EXIT_FAILURE); // add free geral dps
+	start_philos(data1);
+	while (++i < data1->total_philo)
+		if (pthread_create(&data1->s_philo[i].thread, NULL, &routine, &data1->s_philo[i]) < 0)
 			return (printf("erro ao criar thread"), 0);
-	}
 	i = -1;
-	while (++i < data->total_philo)
-		if (pthread_join(data->philos[i], NULL) != 0) //criar routine
+	while (++i < data1->total_philo)
+		if (pthread_join(data1->s_philo[i].thread, NULL) != 0)
 			return (printf("erro ao criar thread"), 0);
-	// pthread_mutex_destroy(data()->mutex);
+	if (destroy_mutex(data1) == false)
+		return (EXIT_FAILURE);
 }

@@ -3,46 +3,65 @@
 /*                                                        :::      ::::::::   */
 /*   start.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
+/*   By: klino-an <klino-an@student.42lisboa.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/10 17:04:41 by marvin            #+#    #+#             */
-/*   Updated: 2025/09/10 17:04:41 by marvin           ###   ########.fr       */
+/*   Updated: 2025/09/17 17:14:12 by klino-an         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../philosophers.h"
 
-t_philo	*data(void)
+t_data	*data(void)
 {
-    static t_philo philo;
-    return (&philo); 
+    static t_data data;
+    return (&data); 
 }
-t_philo	*initialize_vars(int argc, char **argv)
-{
-    t_philo *data;
 
-    data = malloc(sizeof(t_philo));
-    if (!data)
-        return (NULL);
-    data->argc = argc;
-    data->argv = argv;
-    data->total_philo = ft_atoi(argv[1]);
-    data->time_to_die = ft_atoi(argv[2]);
-    data->time_to_eat = ft_atoi(argv[3]);
-    data->time_to_sleep = ft_atoi(argv[4]);
-    data->minimun_meals = false;
-    data->total_forks = data->total_philo;
-    data->mutex = NULL;
-    if (argv[5])
+void start_philos(t_data *data)
+{
+    int i;
+    int philo_id;
+	t_philo *philo;
+	
+    i = 0;
+    philo_id = 1;
+	philo = data->s_philo;
+    while (i < data->total_philo)
     {
-        data->minimun_meals = true;
-        data->min_meals = ft_atoi(argv[5]);
+        philo[i].id = philo_id;
+        philo[i].last_meal = -1;
+        philo[i].meals_eaten = -1;
+        philo[i].r_fork = &data->forks[i];
+        if (philo_id != data->total_forks)
+           philo[i].l_fork = &data->forks[philo_id];
+        else
+           philo[i].l_fork = &data->forks[0];
+		philo_id++;
+		i++;
     }
-    data->philos = malloc ((sizeof(pthread_t *) * ft_atoi(argv[1])) + 1);
-    data->forks = malloc (sizeof(int) * ft_atoi(argv[1]));
-    if (!data->philos || !data->forks)  
-        return NULL ;
-    return (data);
+}
+
+bool	initialize_vars(char **argv)
+{
+	data()->total_philo = ft_atoi(argv[1]);
+	data()->time_to_die = ft_atoi(argv[2]);
+	data()->time_to_eat = ft_atoi(argv[3]);
+	data()->time_to_sleep = ft_atoi(argv[4]);
+	data()->minimun_meals = false;
+	data()->total_forks = data()->total_philo;
+	data()->start_time = get_time();
+	data()->p_i = -1;
+	if (argv[5])
+	{
+		data()->minimun_meals = true;
+		data()->min_meals = ft_atoi(argv[5]);
+	}
+	data()->s_philo = malloc((sizeof(t_philo) * data()->total_philo));
+    data()->forks = malloc(sizeof(pthread_mutex_t) * data()->total_forks);
+	if (!data()->s_philo || !data()->forks)
+		return (printf("failed to allocate memory"), false);
+	return (true);
 }
 
 bool	check_args(int argc, char **argv)

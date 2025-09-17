@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   libfunc.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
+/*   By: klino-an <klino-an@student.42lisboa.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/10 17:38:59 by marvin            #+#    #+#             */
-/*   Updated: 2025/09/10 17:38:59 by marvin           ###   ########.fr       */
+/*   Updated: 2025/09/16 16:06:50 by klino-an         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,4 +44,14 @@ int	ft_isdigit(int c)
 	if ((c >= '0' && c <= '9'))
 		return (1);
 	return (0);
+}
+
+int	ft_strlen(char *str)
+{
+	int i;
+
+	i = 0;
+	while (str[i])
+		i++;
+	return (i);
 }

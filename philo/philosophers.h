@@ -13,6 +13,7 @@ typedef struct s_philosopers
 	int				id;
 	int				last_meal;
 	int				meals_eaten;
+	bool			is_dead;
 	pthread_t		thread;
 	pthread_mutex_t	*l_fork;
 	pthread_mutex_t	*r_fork;
@@ -27,11 +28,11 @@ typedef struct s_data
 	int				time_to_sleep;
 	long			start_time;
 	int				min_meals;
-	int				p_i;
 	bool			minimun_meals;
 	pthread_mutex_t	mutex;
 	pthread_mutex_t	*forks;
 	t_philo			*s_philo;
+	pthread_t		monitor;
 }					t_data;
 
 // libft functions
@@ -43,6 +44,10 @@ t_data				*data(void);
 bool				initialize_vars(char **argv);
 void				start_philos(t_data *data);
 bool				check_args(int argc, char **argv);
+void				*monitoring();
+void				*routine();
+int					create_thread(t_data *data);
+
 
 // mutex
 bool				intialize_mutex(t_data *data);

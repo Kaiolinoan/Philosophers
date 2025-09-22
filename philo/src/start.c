@@ -6,7 +6,7 @@
 /*   By: klino-an <klino-an@student.42lisboa.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/10 17:04:41 by marvin            #+#    #+#             */
-/*   Updated: 2025/09/17 17:14:12 by klino-an         ###   ########.fr       */
+/*   Updated: 2025/09/22 15:41:36 by klino-an         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,6 +32,7 @@ void start_philos(t_data *data)
         philo[i].id = philo_id;
         philo[i].last_meal = -1;
         philo[i].meals_eaten = -1;
+        philo[i].is_dead = false;
         philo[i].r_fork = &data->forks[i];
         if (philo_id != data->total_forks)
            philo[i].l_fork = &data->forks[philo_id];
@@ -51,7 +52,6 @@ bool	initialize_vars(char **argv)
 	data()->minimun_meals = false;
 	data()->total_forks = data()->total_philo;
 	data()->start_time = get_time();
-	data()->p_i = -1;
 	if (argv[5])
 	{
 		data()->minimun_meals = true;
@@ -89,4 +89,26 @@ bool	check_args(int argc, char **argv)
 		i++;
 	}
 	return (true);
+}
+
+int	create_thread(t_data *data)
+{
+	int i;
+
+	i = -1;
+	while (++i < data->total_philo)
+	{
+		if (pthread_create(&data->s_philo[i].thread, NULL, &routine, &data->s_philo[i]) < 0)
+		return (printf("erro ao criar thread"), clean_mem(data), 0);
+	}
+	if (pthread_create(&data->monitor, NULL, &monitoring, NULL) < 0)
+		return (printf("erro ao criar thread"), clean_mem(data), 0);
+
+	i = -1;
+	while (++i < data->total_philo)
+		if (pthread_join(data->s_philo[i].thread, NULL) != 0)
+			return (printf("erro  ao dar join na thread"), clean_mem(data) ,0);
+	if (pthread_join(data->monitor, NULL) != 0)
+		return (printf("erro  ao dar join na thread"), clean_mem(data) ,0);
+	return (1);
 }

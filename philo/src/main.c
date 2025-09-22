@@ -32,28 +32,34 @@
 
 void	take_left_fork(t_philo *philo)
 {
-	pthread_mutex_lock(&data()->mutex);
-	print_msg(philo->id, "has taken a left fork");
-	pthread_mutex_unlock(&data()->mutex);
 	pthread_mutex_lock(philo->l_fork);
+	print_msg(philo->id, "has taken a left fork");
 }
 
 void	take_right_fork(t_philo *philo)
 {
-	pthread_mutex_lock(&data()->mutex);
-	print_msg(philo->id, "has taken a right fork");
-	pthread_mutex_unlock(&data()->mutex);
 	pthread_mutex_lock(philo->r_fork);
+	print_msg(philo->id, "has taken a right fork");
 }
 
-void	eating(t_philo *philo)
+void	philo_eat(t_philo *philo)
 {
-	// pthread_mutex_lock(&data->mutex);
 	print_msg(philo->id,"is eating");
-	// pthread_mutex_unlock(&data->mutex);
 	usleep(data()->time_to_eat * 1000);
 	pthread_mutex_unlock(philo->l_fork);
 	pthread_mutex_unlock(philo->r_fork);
+}
+
+void	philo_sleep(t_philo *philo)
+{
+	print_msg(philo->id,"is sleeping");
+	usleep(data()->time_to_sleep * 1000);
+}
+
+void	philo_think(t_philo *philo)
+{
+	print_msg(philo->id,"is thinking");
+	usleep(100);
 }
 
 void	*routine(void *arg)
@@ -63,13 +69,12 @@ void	*routine(void *arg)
 	philo = arg;
 	while (1)
 	{
-		// pegar o garfo
+		philo_think(philo);
+		//pode dar deadlock, entao mudar a ordem cpa
 		take_left_fork(philo);
 		take_right_fork(philo);
-		// comer
-		eating(philo);
-		// dormir
-		// pensar
+		philo_eat(philo);
+		philo_sleep(philo);
 		// morrer
 		break ;
 	}
@@ -81,26 +86,24 @@ int	main(int argc, char **argv)
 	t_data	*data1;
 
 	int i = -1;
-	data1 = NULL;
 	if (argc > 6)
 		return (printf("saiu no argc"), 0); // arumar aqui dps
 	if (initialize_vars(argv) == false)
-		return (free(data1->s_philo), EXIT_FAILURE);
-
+		return (free(data()->forks), free(data()->s_philo), EXIT_FAILURE);
 	data1 = data();
 	if (check_args(argc, argv) == false)
-		return (EXIT_FAILURE);
-			// dps verificar se aloquei alguma coisa antes de sair
+		return (clean_mem(data1), EXIT_FAILURE);
 	if (intialize_mutex(data1) == false)
-		return (EXIT_FAILURE); // add free geral dps
+		return (clean_mem(data1), EXIT_FAILURE);
 	start_philos(data1);
 	while (++i < data1->total_philo)
 		if (pthread_create(&data1->s_philo[i].thread, NULL, &routine, &data1->s_philo[i]) < 0)
-			return (printf("erro ao criar thread"), 0);
+			return (printf("erro ao criar thread"), clean_mem(data1), 0);
 	i = -1;
 	while (++i < data1->total_philo)
 		if (pthread_join(data1->s_philo[i].thread, NULL) != 0)
-			return (printf("erro ao criar thread"), 0);
+			return (printf("erro  ao dar join na thread"), clean_mem(data1) ,0);
 	if (destroy_mutex(data1) == false)
-		return (EXIT_FAILURE);
+		return (clean_mem(data1), EXIT_FAILURE);
+	clean_mem(data1);
 }

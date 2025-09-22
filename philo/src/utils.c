@@ -31,12 +31,24 @@ void	print_msg(int id, char *msg)
 {
 	long	time;
 
+	pthread_mutex_lock(&data()->mutex);
 	time = get_time();
 	time = time - data()->start_time;
-	// write(1, &time, sizeof(time));
-	// write(1, " ", 1);
-	// write(1, &id, sizeof(id));
-	// write(1, " ", 1);
-	// write(1, msg, ft_strlen(msg));
 	printf("%ld %d %s \n", time, id, msg);
+	pthread_mutex_unlock(&data()->mutex);
+
+}
+
+void clean_mem(t_data *data)
+{
+	if (data->forks)
+	{
+		free(data->forks);
+		data->forks = NULL;
+	}
+	if (data->s_philo)
+	{
+		free(data->s_philo);
+		data->s_philo = NULL;
+	}
 }

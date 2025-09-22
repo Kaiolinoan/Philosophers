@@ -14,11 +14,9 @@
 
 bool	intialize_mutex(t_data *data)
 {
-	t_philo	*philo;
 	int		i;
 
 	i = 0;
-	philo = data->s_philo;
 	if (pthread_mutex_init(&data->mutex, NULL) != 0)
 			return (false);
 	while (i < data->total_forks)
@@ -32,11 +30,9 @@ bool	intialize_mutex(t_data *data)
 
 bool	destroy_mutex(t_data *data)
 {
-	t_philo *philo;
 	int i;
 
 	i = 0;
-	philo = data->s_philo;
 	if (pthread_mutex_destroy(&data->mutex) != 0)
 		return (false);
 	while (i < data->total_forks)

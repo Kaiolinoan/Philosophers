@@ -51,6 +51,8 @@ bool				destroy_mutex(t_data *data);
 // utils
 long				get_time(void);
 void				print_msg(int id, char *msg);
+void 				clean_mem(t_data *data);
+
 
 // fork
 void				take_left_fork(t_philo *philo);

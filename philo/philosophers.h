@@ -13,7 +13,8 @@ typedef struct s_philosopers
 	int				id;
 	int				last_meal;
 	int				meals_eaten;
-	bool			is_dead;
+	bool			eating;
+	bool			max_meals;
 	pthread_t		thread;
 	pthread_mutex_t	*l_fork;
 	pthread_mutex_t	*r_fork;
@@ -27,8 +28,9 @@ typedef struct s_data
 	int				time_to_eat;
 	int				time_to_sleep;
 	long			start_time;
-	int				min_meals;
-	bool			minimun_meals;
+	int				meals_nb;
+	bool			meals_limiter;
+	bool			philo_died;
 	pthread_mutex_t	mutex;
 	pthread_mutex_t	*forks;
 	t_philo			*s_philo;
@@ -39,9 +41,11 @@ typedef struct s_data
 int					ft_atoi(const char *str);
 int					ft_isdigit(int c);
 int					ft_strlen(char *str);
+int					ft_strncmp(const char *s1, const char *s2, size_t n);
+
 
 t_data				*data(void);
-bool				initialize_vars(char **argv);
+bool				initialize_vars(int argc, char **argv);
 void				start_philos(t_data *data);
 bool				check_args(int argc, char **argv);
 void				*monitoring();

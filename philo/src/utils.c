@@ -34,7 +34,10 @@ void	print_msg(int id, char *msg)
 	pthread_mutex_lock(&data()->mutex);
 	time = get_time();
 	time = time - data()->start_time;
-	printf("%ld %d %s \n", time, id, msg);
+	if (data()->philo_died == false || ft_strncmp(msg, "died", 4) == 0)
+	{
+		printf("%ld %d %s \n", time, id, msg);
+	}
 	pthread_mutex_unlock(&data()->mutex);
 
 }

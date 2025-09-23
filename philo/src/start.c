@@ -30,9 +30,10 @@ void start_philos(t_data *data)
     while (i < data->total_philo)
     {
         philo[i].id = philo_id;
-        philo[i].last_meal = -1;
-        philo[i].meals_eaten = -1;
-        philo[i].is_dead = false;
+        philo[i].last_meal = data->start_time;
+        philo[i].meals_eaten = 0;
+        philo[i].eating = false;
+        philo[i].max_meals = false;
         philo[i].r_fork = &data->forks[i];
         if (philo_id != data->total_forks)
            philo[i].l_fork = &data->forks[philo_id];
@@ -43,19 +44,20 @@ void start_philos(t_data *data)
     }
 }
 
-bool	initialize_vars(char **argv)
+bool	initialize_vars(int argc, char **argv)
 {
 	data()->total_philo = ft_atoi(argv[1]);
 	data()->time_to_die = ft_atoi(argv[2]);
 	data()->time_to_eat = ft_atoi(argv[3]);
 	data()->time_to_sleep = ft_atoi(argv[4]);
-	data()->minimun_meals = false;
+	data()->meals_nb = 0;
 	data()->total_forks = data()->total_philo;
 	data()->start_time = get_time();
-	if (argv[5])
+	data()->philo_died = false;
+	if (argc == 5)
 	{
-		data()->minimun_meals = true;
-		data()->min_meals = ft_atoi(argv[5]);
+		data()->meals_limiter = true;
+		data()->meals_nb = ft_atoi(argv[5]);
 	}
 	data()->s_philo = malloc((sizeof(t_philo) * data()->total_philo));
     data()->forks = malloc(sizeof(pthread_mutex_t) * data()->total_forks);
@@ -101,6 +103,17 @@ int	create_thread(t_data *data)
 		if (pthread_create(&data->s_philo[i].thread, NULL, &routine, &data->s_philo[i]) < 0)
 		return (printf("erro ao criar thread"), clean_mem(data), 0);
 	}
+
+	// Aguarda todos começarem (evita corridas)
+	usleep(100);
+
+	// Agora define o tempo de início
+	data->start_time = get_time();
+
+	// Atualiza last_meal com o start_time
+	for (int j = 0; j < data->total_philo; j++)
+		data->s_philo[j].last_meal = data->start_time;
+
 	if (pthread_create(&data->monitor, NULL, &monitoring, NULL) < 0)
 		return (printf("erro ao criar thread"), clean_mem(data), 0);
 

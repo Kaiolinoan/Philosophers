@@ -30,16 +30,17 @@ long	get_time(void)
 void	print_msg(int id, char *msg)
 {
 	long	time;
+	bool is_dead;
 
+	pthread_mutex_lock(&data()->state_mutex);
+	is_dead = data()->philo_died;
+	pthread_mutex_unlock(&data()->state_mutex);
 	pthread_mutex_lock(&data()->mutex);
 	time = get_time();
 	time = time - data()->start_time;
-	if (data()->philo_died == false || ft_strncmp(msg, "died", 4) == 0)
-	{
-		printf("%ld %d %s \n", time, id, msg);
-	}
+	if (!is_dead || ft_strncmp(msg, "died", 4) == 0)
+		printf("%ld %d %s\n", time, id, msg);
 	pthread_mutex_unlock(&data()->mutex);
-
 }
 
 void clean_mem(t_data *data)

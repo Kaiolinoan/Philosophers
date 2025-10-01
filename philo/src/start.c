@@ -46,15 +46,18 @@ void start_philos(t_data *data)
 
 bool	initialize_vars(int argc, char **argv)
 {
+	t_data * data1;
+
 	data()->total_philo = ft_atoi(argv[1]);
 	data()->time_to_die = ft_atoi(argv[2]);
 	data()->time_to_eat = ft_atoi(argv[3]);
 	data()->time_to_sleep = ft_atoi(argv[4]);
 	data()->meals_nb = 0;
+	data()->meals_limiter = false;
 	data()->total_forks = data()->total_philo;
 	data()->start_time = get_time();
 	data()->philo_died = false;
-	if (argc == 5)
+	if (argc == 6)
 	{
 		data()->meals_limiter = true;
 		data()->meals_nb = ft_atoi(argv[5]);
@@ -63,6 +66,8 @@ bool	initialize_vars(int argc, char **argv)
     data()->forks = malloc(sizeof(pthread_mutex_t) * data()->total_forks);
 	if (!data()->s_philo || !data()->forks)
 		return (printf("failed to allocate memory"), false);
+	data1 = data();
+	start_philos(data1);
 	return (true);
 }
 
@@ -79,13 +84,6 @@ bool	check_args(int argc, char **argv)
 		{
 			if (ft_isdigit(argv[i][j]) == 0)
 				return (false);
-            if (argv[i][j] <= 0 )
-            {
-                if (argv[5][j] >= 0)
-                    continue;
-                else 
-                    return (false);
-            }
 			j++;
 		}
 		i++;
@@ -93,35 +91,26 @@ bool	check_args(int argc, char **argv)
 	return (true);
 }
 
-int	create_thread(t_data *data)
+int	create_thread(t_data *data1)
 {
 	int i;
 
+	data()->start_time = get_time();
+	for (int j = 0; j < data()->total_philo; j++)
+		data()->s_philo[j].last_meal = data()->start_time;
 	i = -1;
-	while (++i < data->total_philo)
-	{
-		if (pthread_create(&data->s_philo[i].thread, NULL, &routine, &data->s_philo[i]) < 0)
-		return (printf("erro ao criar thread"), clean_mem(data), 0);
-	}
-
-	// Aguarda todos começarem (evita corridas)
+	while (++i < data1->total_philo)
+		if (pthread_create(&data1->s_philo[i].thread, NULL, &routine, &data1->s_philo[i]) != 0)
+			return (printf("erro ao criar thread"), clean_mem(data1), 0);
 	usleep(100);
-
-	// Agora define o tempo de início
-	data->start_time = get_time();
-
-	// Atualiza last_meal com o start_time
-	for (int j = 0; j < data->total_philo; j++)
-		data->s_philo[j].last_meal = data->start_time;
-
-	if (pthread_create(&data->monitor, NULL, &monitoring, NULL) < 0)
-		return (printf("erro ao criar thread"), clean_mem(data), 0);
-
+	data1 = data();
+	if (pthread_create(&data1->monitor_thread, NULL, &monitoring, data1) != 0)
+		return (printf("erro ao criar thread"), clean_mem(data1), 0);
 	i = -1;
-	while (++i < data->total_philo)
-		if (pthread_join(data->s_philo[i].thread, NULL) != 0)
-			return (printf("erro  ao dar join na thread"), clean_mem(data) ,0);
-	if (pthread_join(data->monitor, NULL) != 0)
-		return (printf("erro  ao dar join na thread"), clean_mem(data) ,0);
+	while (++i < data1->total_philo)
+		if (pthread_join(data1->s_philo[i].thread, NULL) != 0)
+			return (printf("erro  ao dar join na thread"), clean_mem(data1) ,0);
+	if (pthread_join(data1->monitor_thread, NULL) != 0)
+		return (printf("erro  ao dar join na thread"), clean_mem(data1) ,0);
 	return (1);
 }

@@ -11,11 +11,12 @@
 typedef struct s_philosopers
 {
 	int				id;
-	int				last_meal;
+	long			last_meal;
 	int				meals_eaten;
 	bool			eating;
 	bool			max_meals;
 	pthread_t		thread;
+	pthread_mutex_t	meal_mutex;
 	pthread_mutex_t	*l_fork;
 	pthread_mutex_t	*r_fork;
 }					t_philo;
@@ -31,10 +32,11 @@ typedef struct s_data
 	int				meals_nb;
 	bool			meals_limiter;
 	bool			philo_died;
+	pthread_t		monitor_thread;
 	pthread_mutex_t	mutex;
+	pthread_mutex_t	state_mutex;
 	pthread_mutex_t	*forks;
 	t_philo			*s_philo;
-	pthread_t		monitor;
 }					t_data;
 
 // libft functions

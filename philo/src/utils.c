@@ -19,8 +19,8 @@ long	get_time(void)
 	long			micro;
 	long			mili;
 
-	if (gettimeofday(&tv, NULL) < 0 )
-		return ( printf("time failed"),0);
+	if (gettimeofday(&tv, NULL) < 0)
+		return (printf("time failed"), 0);
 	sec = tv.tv_sec * 1000L;
 	micro = tv.tv_usec / 1000L;
 	mili = sec + micro;
@@ -30,7 +30,7 @@ long	get_time(void)
 void	print_msg(int id, char *msg)
 {
 	long	time;
-	bool is_dead;
+	bool	is_dead;
 
 	pthread_mutex_lock(&data()->state_mutex);
 	is_dead = data()->philo_died;
@@ -43,7 +43,7 @@ void	print_msg(int id, char *msg)
 	pthread_mutex_unlock(&data()->mutex);
 }
 
-void clean_mem(t_data *data)
+void	clean_mem(t_data *data)
 {
 	if (data->forks)
 	{

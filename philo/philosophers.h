@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   philosophers.h                                     :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: klino-an <klino-an@student.42lisboa.com    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/10/01 15:22:14 by klino-an          #+#    #+#             */
+/*   Updated: 2025/10/01 15:22:14 by klino-an         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #ifndef PHILOSOPHERS_H
 # define PHILOSOPHERS_H
 
@@ -11,8 +23,8 @@
 typedef struct s_philosopers
 {
 	int				id;
-	long			last_meal;
 	int				meals_eaten;
+	long			last_meal;
 	bool			eating;
 	bool			max_meals;
 	pthread_t		thread;
@@ -28,8 +40,8 @@ typedef struct s_data
 	int				time_to_die;
 	int				time_to_eat;
 	int				time_to_sleep;
-	long			start_time;
 	int				meals_nb;
+	long			start_time;
 	bool			meals_limiter;
 	bool			philo_died;
 	pthread_t		monitor_thread;
@@ -45,15 +57,15 @@ int					ft_isdigit(int c);
 int					ft_strlen(char *str);
 int					ft_strncmp(const char *s1, const char *s2, size_t n);
 
-
+//start
 t_data				*data(void);
 bool				initialize_vars(int argc, char **argv);
-void				start_philos(t_data *data);
 bool				check_args(int argc, char **argv);
-void				*monitoring();
-void				*routine();
 int					create_thread(t_data *data);
 
+//general
+void				*monitoring(void *arg);
+void				*routine(void *arg);
 
 // mutex
 bool				intialize_mutex(t_data *data);
@@ -62,11 +74,6 @@ bool				destroy_mutex(t_data *data);
 // utils
 long				get_time(void);
 void				print_msg(int id, char *msg);
-void 				clean_mem(t_data *data);
-
-
-// fork
-void				take_left_fork(t_philo *philo);
-void				take_right_fork(t_philo *philo);
+void				clean_mem(t_data *data);
 
 #endif

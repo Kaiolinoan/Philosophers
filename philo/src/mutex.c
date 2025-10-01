@@ -20,9 +20,9 @@ bool	intialize_mutex(t_data *data)
 	i = 0;
 	j = 0;
 	if (pthread_mutex_init(&data->mutex, NULL) != 0)
-			return (false);
+		return (false);
 	if (pthread_mutex_init(&data->state_mutex, NULL) != 0)
-			return (false);
+		return (false);
 	while (i < data->total_forks)
 		if (pthread_mutex_init(&data->forks[i++], NULL) != 0)
 			return (false);
@@ -34,8 +34,8 @@ bool	intialize_mutex(t_data *data)
 
 bool	destroy_mutex(t_data *data)
 {
-	int i;
-	int j;
+	int	i;
+	int	j;
 
 	i = 0;
 	j = 0;
@@ -48,6 +48,6 @@ bool	destroy_mutex(t_data *data)
 			return (false);
 	while (j < data->total_philo)
 		if (pthread_mutex_destroy(&data->s_philo[j++].meal_mutex) != 0)
-				return (false);
+			return (false);
 	return (true);
 }

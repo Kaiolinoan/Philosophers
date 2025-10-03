@@ -6,7 +6,7 @@
 /*   By: klino-an <klino-an@student.42lisboa.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/01 16:33:39 by klino-an          #+#    #+#             */
-/*   Updated: 2025/10/01 16:44:15 by klino-an         ###   ########.fr       */
+/*   Updated: 2025/10/02 16:49:12 by klino-an         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,11 +58,11 @@ static void	philo_think(t_philo *philo)
 	if (!is_dead)
 	{
 		print_msg(philo->id, "is thinking");
-		usleep(1000);
+		usleep(500);
 	}
 }
 
-static void	choose_fork(t_philo *philo)
+static bool	choose_fork(t_philo *philo)
 {
 	pthread_mutex_t	*first;
 	pthread_mutex_t	*second;
@@ -79,26 +79,34 @@ static void	choose_fork(t_philo *philo)
 	}
 	pthread_mutex_lock(first);
 	print_msg(philo->id, "has taken a fork");
+	if (data()->total_philo == 1)
+		return (pthread_mutex_unlock(first), false);
 	pthread_mutex_lock(second);
 	print_msg(philo->id, "has taken a fork");
+	return (true);
 }
 
 void	*routine(void *arg)
 {
 	t_philo	*philo;
 	bool	is_dead;
+	bool	max_meals;
 
 	philo = arg;
-	if (philo->id % 2 == 0)
-		usleep(data()->time_to_eat * 1000);
+	if (data()->meals_nb == 0 && data()->meals_limiter)
+		return (NULL);
 	while (1)
 	{
 		pthread_mutex_lock(&data()->state_mutex);
 		is_dead = data()->philo_died;
 		pthread_mutex_unlock(&data()->state_mutex);
-		if (philo->max_meals || is_dead)
+		pthread_mutex_lock(&philo->meal_mutex);
+		max_meals = philo->max_meals;
+		pthread_mutex_unlock(&philo->meal_mutex);
+		if (max_meals || is_dead)
 			break ;
-		choose_fork(philo);
+		if (!choose_fork(philo))
+			break ;
 		philo_eat(philo);
 		philo_sleep(philo);
 		philo_think(philo);
